@@ -12,22 +12,21 @@ function validateModuleInput(input) {
 
 function calculateDeadline() {
     const startVal = document.getElementById('courseStartDate').value;
-    if (!startVal) return;
-
+    const banner = document.getElementById('deadlineBanner');
+    if (!startVal) { banner.classList.add('hidden'); return; }
     const startDate = new Date(startVal);
     if (startDate < DATE_FLOOR) {
         alert("The Course Commencement Date must be January 1st, 2024 or later.");
         document.getElementById('courseStartDate').value = "";
+        banner.classList.add('hidden');
         return;
     }
-
     maxCompletionDate = new Date(startDate);
     maxCompletionDate.setMonth(startDate.getMonth() + 30);
-
     document.getElementById('maxEndDateDisplay').innerText = maxCompletionDate.toLocaleDateString('en-GB', {
         day: 'numeric', month: 'long', year: 'numeric'
     });
-    document.getElementById('deadlineBanner').classList.remove('hidden');
+    banner.classList.remove('hidden');
 }
 
 function resetForm() {
@@ -77,22 +76,16 @@ function generateSchedule() {
     document.getElementById('downloadBtn').style.display = "inline-block";
 
     let loopDate = new Date(reviewDate);
-
     for (let i = currentMod; i <= 52; i++) {
-        if (loopDate.getDay() === 0) {
-            loopDate.setDate(loopDate.getDate() + 1);
-        }
-
+        if (loopDate.getDay() === 0) loopDate.setDate(loopDate.getDate() + 1);
         const isOverdue = loopDate > maxCompletionDate;
         const row = document.createElement('tr');
         if (isOverdue) row.classList.add('overdue-row');
-
         row.innerHTML = `
             <td>Module ${String(i).padStart(2, '0')} ${isOverdue ? '⚠️' : ''}</td>
             <td>${loopDate.toLocaleDateString('en-GB')}</td>
             <td>${loopDate.toLocaleDateString('en-US', { weekday: 'long' })}</td>
         `;
-
         tableBody.appendChild(row);
         loopDate.setDate(loopDate.getDate() + 8);
     }
@@ -104,7 +97,6 @@ function exportToCSV() {
         let cols = Array.from(tr.querySelectorAll("td")).map(td => `"${td.innerText.replace('⚠️', '').trim()}"`);
         csv.push(cols.join(","));
     });
-
     const blob = new Blob([csv.join("\n")], { type: "text/csv" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
