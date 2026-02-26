@@ -84,13 +84,15 @@ label {
     text-transform: uppercase;
 }
 
-input {
+input,
+select {
     padding: 0.8rem;
     border: 1.5px solid #e2e8f0;
     border-radius: 10px;
     font-size: 1rem;
     width: 100%;
     cursor: pointer;
+    background-color: white;
 }
 
 .actions {
@@ -125,6 +127,21 @@ button {
     color: #991b1b;
 }
 
+/* Dashboard Summary Card */
+.summary-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    border-left: 5px solid var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.summary-card p {
+    margin: 0;
+    line-height: 1.4;
+}
+
 .table-container {
     background: white;
     border-radius: 15px;
@@ -135,7 +152,7 @@ button {
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 500px;
+    min-width: 550px;
 }
 
 th {
@@ -182,7 +199,6 @@ td {
     margin: 0;
 }
 
-/* Developer Attribution Styling */
 .developer-info {
     margin-top: 3rem;
     text-align: center;

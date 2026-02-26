@@ -6,7 +6,7 @@ function validateModuleInput(input) {
     if (val.length > 2) val = val.slice(0, 2);
     let num = parseInt(val);
     if (num > 51) val = "51";
-    else if (num < 1 && val !== "") val = "1";
+    else if (num < 5 && val !== "") val = "5";
     input.value = val;
 }
 
@@ -31,19 +31,29 @@ function calculateDeadline() {
 
 function resetForm() {
     document.getElementById('courseStartDate').value = "";
-    document.getElementById('currentModule').value = "1";
+    document.getElementById('currentModule').value = "5";
     document.getElementById('reviewDate').value = "";
+    document.getElementById('attempts').value = "1";
     document.getElementById('deadlineBanner').classList.add('hidden');
     document.getElementById('results').classList.add('hidden');
+    document.getElementById('simulationSummary').classList.add('hidden');
     document.getElementById('downloadBtn').style.display = "none";
     document.getElementById('tableBody').innerHTML = "";
     maxCompletionDate = null;
+}
+
+function checkSunday(date) {
+    if (date.getDay() === 0) {
+        date.setDate(date.getDate() + 1);
+    }
+    return date;
 }
 
 function generateSchedule() {
     const currentMod = parseInt(document.getElementById('currentModule').value);
     const reviewDateVal = document.getElementById('reviewDate').value;
     const startDateVal = document.getElementById('courseStartDate').value;
+    const attemptVal = parseInt(document.getElementById('attempts').value);
     const today = new Date(); today.setHours(0, 0, 0, 0);
 
     if (!startDateVal || !reviewDateVal) {
@@ -59,40 +69,67 @@ function generateSchedule() {
 
     if (!maxCompletionDate) calculateDeadline();
 
-    let checkDate = new Date(reviewDate);
-    for (let i = currentMod; i <= 52; i++) {
-        if (checkDate.getDay() === 0) checkDate.setDate(checkDate.getDate() + 1);
-        if (i < 52) checkDate.setDate(checkDate.getDate() + 8);
-    }
-
-    if (checkDate > maxCompletionDate) {
-        const userProceed = confirm("Warning: You may not be able to complete the course before the 2.5-year deadline. Are you sure you want to display the schedule?");
-        if (!userProceed) return;
-    }
-
     const tableBody = document.getElementById('tableBody');
     tableBody.innerHTML = "";
+    let loopDate = new Date(reviewDate);
+
+    for (let i = currentMod; i <= 52; i++) {
+        // Attempt 1
+        checkSunday(loopDate);
+        let status1 = (attemptVal === 2) ? "FAIL" : "PASS";
+        addTableRow(i, loopDate, status1);
+
+        if (attemptVal === 2) {
+            // Reattempt happens 7 days later
+            loopDate.setDate(loopDate.getDate() + 7);
+            checkSunday(loopDate);
+            addTableRow(i, loopDate, "PASS (on second attempt)");
+        }
+
+        // Prepare for next module: 8 days after the passing attempt
+        if (i < 52) {
+            loopDate.setDate(loopDate.getDate() + 8);
+        }
+    }
+
+    updateSummary(loopDate, attemptVal);
     document.getElementById('results').classList.remove('hidden');
     document.getElementById('downloadBtn').style.display = "inline-block";
+}
 
-    let loopDate = new Date(reviewDate);
-    for (let i = currentMod; i <= 52; i++) {
-        if (loopDate.getDay() === 0) loopDate.setDate(loopDate.getDate() + 1);
-        const isOverdue = loopDate > maxCompletionDate;
-        const row = document.createElement('tr');
-        if (isOverdue) row.classList.add('overdue-row');
-        row.innerHTML = `
-            <td>Module ${String(i).padStart(2, '0')} ${isOverdue ? '⚠️' : ''}</td>
-            <td>${loopDate.toLocaleDateString('en-GB')}</td>
-            <td>${loopDate.toLocaleDateString('en-US', { weekday: 'long' })}</td>
-        `;
-        tableBody.appendChild(row);
-        loopDate.setDate(loopDate.getDate() + 8);
-    }
+function addTableRow(modNum, date, status) {
+    const tableBody = document.getElementById('tableBody');
+    const isOverdue = date > maxCompletionDate;
+    const row = document.createElement('tr');
+    if (isOverdue) row.classList.add('overdue-row');
+
+    row.innerHTML = `
+        <td>Module ${String(modNum).padStart(2, '0')} ${isOverdue ? '⚠️' : ''}</td>
+        <td>${date.toLocaleDateString('en-GB')}</td>
+        <td><strong>${status}</strong></td>
+        <td>${date.toLocaleDateString('en-US', { weekday: 'long' })}</td>
+    `;
+    tableBody.appendChild(row);
+}
+
+function updateSummary(finalDate, attempts) {
+    const summaryBox = document.getElementById('simulationSummary');
+    const timeDiff = finalDate.getTime() - maxCompletionDate.getTime();
+    const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+    let resultHTML = dayDiff > 0
+        ? `<span style="color:var(--danger)">Warning: Exceeds deadline by <strong>${dayDiff} days</strong>.</span>`
+        : `<span style="color:var(--primary)">Success: Finishes <strong>${Math.abs(dayDiff)} days</strong> before deadline.</span>`;
+
+    summaryBox.innerHTML = `
+        <p><strong>Simulation Result (${attempts} attempts/module):</strong> ${resultHTML}</p>
+        <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-muted);">Final Completion: ${finalDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+    `;
+    summaryBox.classList.remove('hidden');
 }
 
 function exportToCSV() {
-    let csv = ["Module,Date,Day"];
+    let csv = ["Module,Date,Status,Day"];
     document.querySelectorAll("#tableBody tr").forEach(tr => {
         let cols = Array.from(tr.querySelectorAll("td")).map(td => `"${td.innerText.replace('⚠️', '').trim()}"`);
         csv.push(cols.join(","));
@@ -100,6 +137,6 @@ function exportToCSV() {
     const blob = new Blob([csv.join("\n")], { type: "text/csv" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `Roadmap_Mod_${document.getElementById('currentModule').value}.csv`;
+    link.download = "Course_Roadmap.csv";
     link.click();
 }
