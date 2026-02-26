@@ -4,45 +4,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Course Scheduler</title>
+    <title>MilestoneMapper | Course Logic Engine</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div class="container">
         <header>
-            <h1>Course Roadmap Generator</h1>
-            <p>Algorithm: 1 Week + 1 Day offset per module.</p>
+            <h1>MilestoneMapper</h1>
+            <p class="subtitle">Constraint-Based Course Scheduling Engine</p>
+
+            <div id="deadlineBanner" class="deadline-highlight hidden">
+                <strong>Absolute Course Deadline:</strong> <span id="maxEndDateDisplay">--</span>
+            </div>
         </header>
 
         <section class="input-glass">
-            <div class="input-group">
-                <label>Current Module</label>
-                <input type="number" id="currentModule" min="1" max="52" value="1">
+            <div class="input-row">
+                <div class="input-group">
+                    <label>Course Commencement</label>
+                    <input type="date" id="courseStartDate" min="2024-01-01" onkeydown="return false"
+                        onchange="calculateDeadline()">
+                </div>
+                <div class="input-group">
+                    <label>Current Module (1-51)</label>
+                    <input type="number" id="currentModule" min="1" max="51" value="1"
+                        oninput="validateModuleInput(this)">
+                </div>
+                <div class="input-group">
+                    <label>Next Review Date</label>
+                    <input type="date" id="reviewDate" onkeydown="return false">
+                </div>
             </div>
-            <div class="input-group">
-                <label>Date of Review</label>
-                <input type="date" id="startDate">
-            </div>
+
             <div class="actions">
-                <button onclick="generateSchedule()" class="primary-btn">Generate</button>
-                <button onclick="exportToCSV()" id="downloadBtn" class="secondary-btn" style="display:none;">Download
-                    CSV</button>
+                <button onclick="generateSchedule()" class="primary-btn">Compute Roadmap</button>
+                <button onclick="resetForm()" class="reset-btn">Reset Form</button>
+                <button onclick="exportToCSV()" id="downloadBtn" class="secondary-btn" style="display:none;">Export
+                    Dataset (CSV)</button>
             </div>
         </section>
 
         <section id="results" class="hidden">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Module</th>
-                        <th>Review Date</th>
-                        <th>Weekday</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Module No</th>
+                            <th>Date of Review</th>
+                            <th>Weekday</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
         </section>
+
+        <footer class="logic-docs">
+            <h3>Engine Logic & Constraints</h3>
+            <div class="docs-grid">
+                <div class="doc-item">
+                    <h4>Temporal Drift</h4>
+                    <p>Calculates review cycles using an 8-day window (1 week + 1 day) to ensure progressive scheduling.
+                    </p>
+                </div>
+                <div class="doc-item">
+                    <h4>Non-Working Day Logic</h4>
+                    <p>Automatically detects Sunday review dates and shifts them to the following Monday.</p>
+                </div>
+                <div class="doc-item">
+                    <h4>Strict Data Input</h4>
+                    <p>Manual keyboard entry for dates is disabled to enforce 100% calendar-compliant data entry.</p>
+                </div>
+                <div class="doc-item">
+                    <h4>Hard Deadline Validation</h4>
+                    <p>Flags any module projected beyond the 2.5-year completion threshold.</p>
+                </div>
+            </div>
+        </footer>
     </div>
     <script src="script.js"></script>
 </body>
