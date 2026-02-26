@@ -122,7 +122,7 @@ function updateSummary(finalDate, attempts) {
         : `<span style="color:var(--primary)">Success: Finishes <strong>${Math.abs(dayDiff)} days</strong> before deadline.</span>`;
 
     summaryBox.innerHTML = `
-        <p><strong>Simulation Result (${attempts} attempts/module):</strong> ${resultHTML}</p>
+        <p><strong>Simulation Result (${attempts} ${attempts === 1 ? 'attempt' : 'attempts'}/module):</strong> ${resultHTML}</p>
         <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-muted);">Final Completion: ${finalDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
     `;
     summaryBox.classList.remove('hidden');
