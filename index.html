@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Course Scheduler</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Course Roadmap Generator</h1>
+            <p>Algorithm: 1 Week + 1 Day offset per module.</p>
+        </header>
+
+        <section class="input-glass">
+            <div class="input-group">
+                <label>Current Module</label>
+                <input type="number" id="currentModule" min="1" max="52" value="1">
+            </div>
+            <div class="input-group">
+                <label>Date of Review</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="actions">
+                <button onclick="generateSchedule()" class="primary-btn">Generate</button>
+                <button onclick="exportToCSV()" id="downloadBtn" class="secondary-btn" style="display:none;">Download
+                    CSV</button>
+            </div>
+        </section>
+
+        <section id="results" class="hidden">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Module</th>
+                        <th>Review Date</th>
+                        <th>Weekday</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
