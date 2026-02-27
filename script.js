@@ -2,12 +2,12 @@ const DATE_FLOOR = new Date("2024-01-01");
 let maxCompletionDate = null;
 
 function validateModuleInput(input) {
-    let val = input.value;
-    if (val.length > 2) val = val.slice(0, 2);
-    let num = parseInt(val);
-    if (num > 51) val = "51";
-    else if (num < 5 && val !== "") val = "5";
-    input.value = val;
+    let num = parseInt(input.value);
+    // Only validate if a number has actually been entered
+    if (!isNaN(num)) {
+        if (num > 51) input.value = "51";
+        else if (num < 5) input.value = "5";
+    }
 }
 
 function calculateDeadline() {
