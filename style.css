@@ -266,3 +266,16 @@ td {
         text-align: left;
     }
 }
+
+/* Force show up/down arrows on Mobile Browsers (Chrome, Safari, etc) */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: inner-spin-button !important;
+    opacity: 1 !important;
+}
+
+/* Force show for Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+    appearance: auto !important;
+}
